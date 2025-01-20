@@ -1,3 +1,17 @@
+
+增加按照服务配置规则的功能，防止多服务下stcp规则因为本地端口冲突导致失败。
+
+在规则命名前增加"服务名"+"-"，本条规则将只存储到该服务的配置文件中，比如
+有两个服务：
+server1，server2。
+有三条规则：
+rule1，server1-rule2，server2-rule3
+启动后server1对应规则为rule1，server1-rule2
+启动后server2对应规则为rule1，server2-rule3
+
+
+原介绍
+
 # LUCI-APP-MULTI-FRPC
 
 > 这是我第一次开发Openwrt插件，也是我开源的第三个项目，可能会有些Bug，欢迎ISSUE！
