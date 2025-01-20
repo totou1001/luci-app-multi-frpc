@@ -1,4 +1,4 @@
-#!/bin/sh /etc/rc.common
+#!/bin/bash /etc/rc.common
 #Author: monokoo <realstones2012@gmail.com>
 #Thanks to FW867's help
 
@@ -66,6 +66,20 @@ conf_proxy_add() {
 	config_get plugin_host_header_rewrite "$cfg" plugin_host_header_rewrite
 	config_get plugin_header_X_From_Where "$cfg" plugin_header_X_From_Where
 
+	flag="-"
+	if [[ $remark == *$flag* ]] 
+	then
+		OLD_IFS="$IFS"
+		IFS="-"
+		array=($remark)
+		IFS="$OLD_IFS"
+		echo "包含${array[0]}规则$remark" >> "$LOGFILE/frp.log"
+		tmpconf="/var/etc/frp/frpc-proxy-${array[0]}.conf"
+
+	else
+		echo "包含通用规则$remark" >> "$LOGFILE/frp.log"
+		tmpconf="$2"
+	fi
 
 	[ -n "$remark" ] && [ -n "$type" ] || return 1
 	
@@ -167,6 +181,7 @@ config_server_add() {
 
 	# Append service to config file
 	cat "$servicecfg" >> $tmpconf
+	cat "/var/etc/frp/frpc-proxy-$server_name.conf" >> $tmpconf
 }
 
 frp_write_bool() {
@@ -177,9 +192,9 @@ frp_write_bool() {
 
 	config_get_bool val $config "$opt" "$def"
 	if [ "$val" -eq 0 ]; then
-		echo "${opt}=false" >> $service_conf
+		echo "${opt}=false" >> $tmpconf
 	else
-		echo "${opt}=true" >> $service_conf
+		echo "${opt}=true" >> $tmpconf
 	fi
 }
 
