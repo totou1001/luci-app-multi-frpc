@@ -145,8 +145,8 @@ conf_proxy_add() {
 	[ -n "$plugin_host_header_rewrite" ] && echo "plugin_host_header_rewrite=$plugin_host_header_rewrite" >>$tmpconf
 	[ -n "$plugin_header_X_From_Where" ] && echo "plugin_header_X_From_Where=$plugin_header_X_From_Where" >>$tmpconf	
 
-	frp_write_bool use_encryption $cfg 1
-	frp_write_bool use_compression $cfg 1
+	frp_write_bool use_encryption $cfg 1 $tmpconf
+	frp_write_bool use_compression $cfg 1 $tmpconf
 
 }
 
@@ -188,13 +188,14 @@ frp_write_bool() {
 	local opt="$1"
 	local config="$2"
 	local def="$3"
+	local cfgfile="$4"
 	local val
 
 	config_get_bool val $config "$opt" "$def"
 	if [ "$val" -eq 0 ]; then
-		echo "${opt}=false" >> $tmpconf
+		echo "${opt}=false" >> $cfgfile
 	else
-		echo "${opt}=true" >> $tmpconf
+		echo "${opt}=true" >> $cfgfile
 	fi
 }
 
@@ -283,9 +284,9 @@ start() {
 	[ -n "$tls_trusted_ca_file" ] && echo "tls_trusted_ca_file=$tls_trusted_ca_file" >>$service_conf
 
 	config_load "frp"
-	frp_write_bool tcp_mux common 1
-	frp_write_bool tls_enable common 0
-	frp_write_bool login_fail_exit common 1
+	frp_write_bool tcp_mux common 1 $service_conf
+	frp_write_bool tls_enable common 0 $service_conf
+	frp_write_bool login_fail_exit common 1 $service_conf
 
 	# Write Service Config
 	config_foreach conf_proxy_add proxy "$service_conf"
