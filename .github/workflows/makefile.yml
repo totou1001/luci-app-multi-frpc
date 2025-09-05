@@ -1,0 +1,218 @@
+跳至主要内容
+导航菜单
+托图1001
+luci-app-multi-frpc
+
+键入搜索/
+法典
+拉取请求
+行动
+项目
+维基
+安全
+见解
+设置
+未保存的更改
+此文件有未保存的更改可以恢复。
+luci-app-multi-frpc/.github 域名/工作流
+/
+makefile.yml
+在
+主要
+
+编辑
+
+预览
+缩进模式
+
+空间
+缩进大小
+
+2
+换行模式
+
+无包装
+编辑makefile.yml文件内容
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+name: Build OpenWrt Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up OpenWrt SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libncurses5-dev unzip wget
+          wget https://downloads.openwrt.org/releases/21.02.0/targets/x86/64/openwrt-sdk-21.02.0-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          tar -xvf openwrt-sdk-*.tar.xz
+          mv openwrt-sdk-* openwrt-sdk
+          echo "$PWD/openwrt-sdk/staging_dir/toolchain-x86_64_gcc-8.4.0_musl/bin" >> $GITHUB_PATH
+
+      - name: Build IPK
+        run: |
+          cd openwrt-sdk
+          cp -r ../luci-app-multi-frpc package/
+          ./scripts/feeds update
+          ./scripts/feeds install luci
+          make package/luci-app-multi-frpc/compile V=s
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: luci-app-multi-frpc-ipk
+          path: openwrt-sdk/bin/packages/*/luci/luci-app-multi-frpc*.ipk
+用于切换键移动焦点。或者，使用 then 移动到页面上的下一个交互元素。Control + Shift + mtabesctab
+在大多数情况下，使用 或 触发自动完成。Control + SpaceOption + Space
+帮助面板导航
+市场
+文档
+工作流入门
+为了帮助您入门，本指南向您展示了一些基本示例。有关工作流的完整 GitHub Actions 文档，请参阅“配置工作流”。
+
+自定义何时触发工作流运行
+将工作流设置为在将事件推送到 和 分支时运行mainrelease/*
+
+on:
+  push:
+    branches:
+    - main
+    - release/*
+将工作流设置为在面向分支的事件上运行pull_requestmain
+
+on:
+  pull_request:
+    branches:
+    - main
+将工作流设置为在周一至周五的每一天 2：00 UTC 运行
+
+on:
+  schedule:
+  - cron: "0 2 * * 1-5"
+有关详细信息，请参阅“触发工作流的事件”。
+
+手动运行工作流
+要手动运行工作流，您可以将工作流配置为使用该事件。这将启用“作”选项卡上的“运行工作流”按钮。workflow_dispatch
+
+on:
+  workflow_dispatch:
+有关详细信息，请参阅“手动运行工作流”。
+
+在不同的作系统上运行作业
+GitHub Actions 为 Linux、Windows 和 macOS 提供托管运行器。
+
+要为作业设置作系统，请使用以下命令指定作系统：runs-on
+
+jobs:
+  my_job:
+    name: deploy to staging
+    runs-on: ubuntu-22.04
+可用的虚拟机类型包括：
+
+ubuntu-latest或ubuntu-22.04ubuntu-20.04
+windows-latest或windows-2022windows-2019
+macos-latest或macos-13macos-12
+有关详细信息，请参阅“GitHub Actions 的虚拟环境”。
+
+使用作
+作是可重用的代码单元，可以由 GitHub 上的任何人构建和分发。您可以在 GitHub Marketplace 以及官方作存储库中找到各种作。
+
+要使用作，必须指定包含该作的存储库。我们还建议您指定 Git 标记，以确保您使用的是该作的已发布版本。
+
+- name: Setup Node
+  uses: actions/setup-node@v4
+  with:
+    node-version: '20.x'
+有关详细信息，请参阅“GitHub Actions 的工作流语法”。
+
+Running a command
+You can run commands on the job's virtual machine.
+
+- name: Install Dependencies
+  run: npm install
+For more information, see "Workflow syntax for GitHub Actions."
+
+Running a job across a matrix of operating systems and runtime versions
+You can automatically run a job across a set of different values, such as different versions of code libraries or operating systems.
+
+For example, this job uses a matrix strategy to run across 3 versions of Node and 3 operating systems:
+
+jobs:
+  test:
+    name: Test on node ${{ matrix.node_version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node_version: ['18.x', '20.x']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node_version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node_version }}
+
+    - name: npm install, build and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm test
+For more information, see "Workflow syntax for GitHub Actions."
+
+Running steps or jobs conditionally
+GitHub Actions supports conditions on steps and jobs using data present in your workflow context.
+
+For example, to run a step only as part of a push and not in a pull_request, you can specify a condition in the property based on the event name:if:
+
+steps:
+- run: npm publish
+  if: github.event_name == 'push'
+For more information, see "Contexts and expression syntax for GitHub Actions."
+
+新文件位于 / ·totou1001/luci-app-multi-frpc
